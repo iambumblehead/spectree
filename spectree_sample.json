@@ -1,0 +1,44 @@
+{
+  "obj"  : "",
+  "type" : "spec",
+  "name" : "spec",
+  "uid"  : "spec",
+  "childs" : [{
+    "obj"  : "",
+    "type" : "navlist",
+    "name" : "nav",
+    "uid"  : "spec-0-nav"
+  },{
+    "obj"  : "",
+    "type" : "navlist",
+    "name" : "foot",
+    "uid"  : "spec-1-foot"
+  },{
+    "obj"  : "",
+    "type" : "optwrap",
+    "name" : "nav",
+    "uid"  : "spec-2-body",
+    "childs" : [{
+      "obj"  : "",
+      "type" : "list",
+      "name" : "userlist",
+      "uid"  : "spec-2-body-0-userlist",
+      "childs" : [{
+        "obj"  : "",
+        "type" : "userstats",
+        "name" : "user",
+        "uid"  : "spec-2-body-0-userlist-0-user"
+      },{
+        "obj"  : "",
+        "type" : "userstats",
+        "name" : "user",
+        "uid"  : "spec-2-body-0-userlist-1-user"
+      },{
+        "obj"  : "",
+        "type" : "userstats",
+        "name" : "user",
+        "uid"  : "spec-2-body-0-userlist-2-user"
+      }]
+    }]
+  }]
+};

@@ -1,5 +1,5 @@
 // Filename: spectree.js  
-// Timestamp: 2015.05.02-00:59:36 (last modified)  
+// Timestamp: 2015.05.07-23:54:14 (last modified)  
 // Author(s): Bumblehead (www.bumblehead.com)
 
 var spectree = ((typeof module === 'object') ? module : {}).exports = (function (s) {
@@ -15,10 +15,57 @@ var spectree = ((typeof module === 'object') ? module : {}).exports = (function 
 
   s.isspecvalidorerr = function (specobj) {
     if (!s.isspecvalid(specobj)) {
-      throw new Error('specobj must be object');
+      throw new Error('object w/ named-property "name" required');
     }
     
     return true;
+  };
+
+  s.dftraverse = function (tree, fn) {
+    (function traverse (node, tree, fn) {
+      node.childs.map(function (cnode) {
+        traverse(cnode, tree, fn);
+      });
+      fn(node, tree);
+    }(tree, tree, fn));
+
+    return tree;    
+  };
+
+  s.getnodepatharr = function (node) {
+    var patharr = [];
+    
+    node.uid.replace(/-([\d]*)-/g, function (_, d) {
+      patharr.push(d);
+    });
+    
+    return patharr;
+  };
+
+  s.getpnodepatharr = function (node) {
+    var patharr = s.getnodepatharr(node);
+    
+    return patharr.slice(0, patharr.length - 1);
+  };
+
+  s.getpatharrnode = function (tree, patharr) {
+    return patharr.length ?
+      s.getpatharrnode(tree.childs[patharr[0]], patharr.slice(1)) : tree;
+  };
+
+  // return pnode of given node 
+  s.getpnode = function (tree, node) {
+    return s.getpatharrnode(tree, s.getpnodepatharr(node));
+  };
+
+  // return pnode near given node where fn is true
+  s.getpnodenear = function (tree, node, fn) {
+    var patharr = s.getpnodepatharr(node);
+    
+    return (function next (x, pnode) {
+      pnode = --x && tree.childs[patharr[x]];
+      return pnode && fn(tree, pnode) ? pnode : next(x, tree);
+    }(patharr.length));
   };
 
   s.getcnodeuid = function (pnode, cnode) {

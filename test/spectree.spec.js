@@ -69,3 +69,101 @@ describe("spectree.getpnodenear()", function () {
     expect(nnode.uid).toBe(cnode.uid);
   });  
 });
+
+describe("spectree.getdmax()", function () {
+  it("should return max depth at node", function () {
+    var tree = {
+      name: 'canvas',
+      uid: 'canvas',
+
+      childs: [{
+        name: 'nav',
+        uid: 'canvas-0-nav',
+        childs: [{
+          name: 'links',
+          uid: 'canvas-0-nav-0-links',
+          childs: [{
+            name: 'img',
+            uid: 'canvas-0-nav-0-links-0-img',
+            childs: []
+          }]
+        }]
+      }]
+    };
+
+    expect( spectree.getdmax(tree) ).toBe(4);
+
+  });
+});
+
+
+describe("spectree.bftraversed()", function () {
+  it("should return cnode that passes function", function () {
+    
+    var tree = {
+      name: 'canvas',
+      uid: 'canvas',
+      childs: [{
+        name: 'nav',
+        uid: 'canvas-0-nav',
+        childs: [{
+          name: 'links',
+          uid: 'canvas-0-nav-0-links',
+          childs: [{
+            name: 'img',
+            uid: 'canvas-0-nav-0-links-0-img',
+            childs: []
+          },{
+            name: 'thumb',
+            uid: 'canvas-0-nav-0-links-0-thumb',
+            childs: []
+          }]
+        }]
+      }]
+    };
+
+    var fnode = spectree.bftraversed(tree, tree, 4, function (tree, node) {
+      return node.name === 'img';
+    });
+
+    expect( fnode.name ).toBe( 'img' );
+  });
+});
+
+
+describe("spectree.cnodenear()", function () {
+  it("should return cnode that passes function", function () {
+    
+    var tree = {
+      name: 'canvas',
+      uid: 'canvas',
+      childs: [{
+        name: 'nav',
+        uid: 'canvas-0-nav',
+        childs: [{
+          name: 'links',
+          uid: 'canvas-0-nav-0-links',
+          childs: [{
+            name: 'img',
+            uid: 'canvas-0-nav-0-links-0-img',
+            childs: []
+          },{
+            name: 'thumb',
+            uid: 'canvas-0-nav-0-links-0-thumb',
+            childs: []
+          }]
+        }]
+      }]
+    };
+
+    var fnode = spectree.bftraverse(tree, function (tree, node) {
+//      console.log('node is ', node);
+//      console.log('=========================');
+      return node.name === 'links';
+    });
+
+    //expect(true).toBe(true);
+    expect( fnode.name ).toBe( 'links' );
+    
+  });
+});

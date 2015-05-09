@@ -1,5 +1,5 @@
 // Filename: spectree.js  
-// Timestamp: 2015.05.07-23:54:14 (last modified)  
+// Timestamp: 2015.05.08-17:03:39 (last modified)  
 // Author(s): Bumblehead (www.bumblehead.com)
 
 var spectree = ((typeof module === 'object') ? module : {}).exports = (function (s) {
@@ -19,17 +19,6 @@ var spectree = ((typeof module === 'object') ? module : {}).exports = (function 
     }
     
     return true;
-  };
-
-  s.dftraverse = function (tree, fn) {
-    (function traverse (node, tree, fn) {
-      node.childs.map(function (cnode) {
-        traverse(cnode, tree, fn);
-      });
-      fn(node, tree);
-    }(tree, tree, fn));
-
-    return tree;    
   };
 
   s.getnodepatharr = function (node) {
@@ -68,11 +57,69 @@ var spectree = ((typeof module === 'object') ? module : {}).exports = (function 
     }(patharr.length));
   };
 
+  s.getdmax = function (tree) {
+    var height = 1,
+        childs = tree && tree.childs;
+
+    if (childs.length) {
+      height += Math.max.apply(s, childs.map(s.getdmax));
+    }
+
+    return height;
+  };
+
+  s.getdmin = function (tree) {
+    var height = 1,
+        childs = tree && tree.childs;
+
+    if (childs.length) {
+      height += Math.min.apply(s, childs.map(s.getdmax));
+    }
+
+    return height;
+  };
+
+  s.bftraversed = function (tree, node, depth, fn) {
+    var fnode;
+    
+    if (depth === 1 && fn(tree, node)) {
+      fnode = node;
+    } else if (depth-- > 1) {      
+      node.childs.some(function (n) {
+        return fnode = s.bftraversed(tree, n, depth, fn);
+      });
+    }
+
+    return fnode;
+  };
+
+  s.bftraverse = function (node, fn) {
+    var height = s.getdmax(node),
+        depth = 0,
+        fnode = null;
+
+    while (++depth < height) {
+      if ((fnode = s.bftraversed(node, node, depth, fn))) {
+        return fnode;
+      }
+    }
+
+    return fnode;
+  };
+
+  s.dftraverse = function (tree, fn) {
+    (function traverse (node, tree, fn) {
+      node.childs.map(function (cnode) {
+        traverse(cnode, tree, fn);
+      });
+      fn(node, tree);
+    }(tree, tree, fn));
+
+    return tree;    
+  };
+
   s.getcnodeuid = function (pnode, cnode) {
-    return ':specpuid-:specci-:speccname'
-      .replace(/:specpuid/, pnode.uid)
-      .replace(/:speccname/, cnode.name)
-      .replace(/:specci/, pnode.childs.length);
+    return [pnode.uid,pnode.childs.length,cnode.name].join('-');
   };
   
   s.addnode = function (pnode, cnode) {

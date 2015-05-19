@@ -1,8 +1,10 @@
 // Filename: spectree.js  
-// Timestamp: 2015.05.08-17:03:39 (last modified)  
+// Timestamp: 2015.05.18-21:29:40 (last modified)  
 // Author(s): Bumblehead (www.bumblehead.com)
 
 var spectree = ((typeof module === 'object') ? module : {}).exports = (function (s) {
+
+  var isword = /^\D/;
 
   s = function (root) {
     return s.node(root);
@@ -31,16 +33,54 @@ var spectree = ((typeof module === 'object') ? module : {}).exports = (function 
     return patharr;
   };
 
+  s.getnoderelativennpatharr = function (node, path) {
+    var cwdpatharr = s.getnodepatharr(node),
+        nodenamearr = path.split('/'),
+        nodenamearrlen = nodenamearr.length;
+
+    return (function next (pos, cwdpatharr, nodename) {
+      if (pos >= nodenamearrlen) return cwdpatharr;
+
+      nodename = nodenamearr[pos];
+      
+      if (nodename === '..') {
+        cwdpatharr.pop();
+      } else if (isword.test(nodename)) {
+        cwdpatharr.push(nodename);        
+      }
+
+      return next(++pos, cwdpatharr);
+    }(0, cwdpatharr));
+  };
+
   s.getpnodepatharr = function (node) {
     var patharr = s.getnodepatharr(node);
     
     return patharr.slice(0, patharr.length - 1);
   };
 
+  s.getnamedcnode = function (pnode, name) {
+    for (var childs = pnode.childs, x = childs.length; x--;) {
+      if (childs[x].name === name) return childs[x];
+    }
+  };
+
+  s.getnncnode = function (pnode, nn) {
+    if (typeof pnode === 'object') {
+      return isword.test(nn) ? s.getnamedcnode(pnode, nn) : pnode.childs[nn];
+    }
+  };
+
+  s.getnnpatharrnode = function (tree, patharr) {
+    return patharr.length ?
+      s.getnnpatharrnode(s.getnncnode(tree, patharr[0]), patharr.slice(1)) : tree;
+  };
+
   s.getpatharrnode = function (tree, patharr) {
     return patharr.length ?
       s.getpatharrnode(tree.childs[patharr[0]], patharr.slice(1)) : tree;
   };
+  
 
   // return pnode of given node 
   s.getpnode = function (tree, node) {
@@ -93,12 +133,13 @@ var spectree = ((typeof module === 'object') ? module : {}).exports = (function 
     return fnode;
   };
 
+  // when fn returns true, traverse ends w/ return of truthy node  
   s.bftraverse = function (node, fn) {
     var height = s.getdmax(node),
         depth = 0,
         fnode = null;
 
-    while (++depth < height) {
+    while (depth++ < height) {
       if ((fnode = s.bftraversed(node, node, depth, fn))) {
         return fnode;
       }
@@ -107,15 +148,30 @@ var spectree = ((typeof module === 'object') ? module : {}).exports = (function 
     return fnode;
   };
 
+  // when fn returns true, traverse ends w/ return of truthy node
   s.dftraverse = function (tree, fn) {
-    (function traverse (node, tree, fn) {
-      node.childs.map(function (cnode) {
-        traverse(cnode, tree, fn);
+    return (function traverse (tree, node, fn, fnode) {
+      node.childs.some(function (cnode) {
+        return fnode = traverse(tree, cnode, fn);
       });
-      fn(node, tree);
+      return fnode || fn(tree, node) && node;
     }(tree, tree, fn));
+  };
 
-    return tree;    
+  s.flatten = function (tree, optfilterfn) {
+    var nodearr = [];
+    s.dftraverse(tree, function (tree, node) {
+      if (typeof optfilterfn === 'function') {
+        optfilterfn(tree, node) && nodearr.push(node);
+      } else {
+        nodearr.push(node);
+      }
+    });
+    return nodearr;
+  };
+
+  s.getpathnode = function (tree, cwdnode, path) {
+    return s.getnnpatharrnode(tree, s.getnoderelativennpatharr(cwdnode, path));
   };
 
   s.getcnodeuid = function (pnode, cnode) {

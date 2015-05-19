@@ -130,6 +130,38 @@ describe("spectree.bftraversed()", function () {
   });
 });
 
+describe("spectree.dftraverse()", function () {
+  it("should return cnode that passes function", function () {
+    
+    var tree = {
+      name: 'canvas',
+      uid: 'canvas',
+      childs: [{
+        name: 'nav',
+        uid: 'canvas-0-nav',
+        childs: [{
+          name: 'links',
+          uid: 'canvas-0-nav-0-links',
+          childs: [{
+            name: 'img',
+            uid: 'canvas-0-nav-0-links-0-img',
+            childs: []
+          },{
+            name: 'thumb',
+            uid: 'canvas-0-nav-0-links-0-thumb',
+            childs: []
+          }]
+        }]
+      }]
+    };
+
+    var fnode = spectree.dftraverse(tree, function (tree, node) {
+      return node.name === 'thumb';
+    });
+
+    expect( fnode.name ).toBe( 'thumb' );
+  });
+});
 
 describe("spectree.cnodenear()", function () {
   it("should return cnode that passes function", function () {
@@ -157,13 +189,41 @@ describe("spectree.cnodenear()", function () {
     };
 
     var fnode = spectree.bftraverse(tree, function (tree, node) {
-//      console.log('node is ', node);
-//      console.log('=========================');
       return node.name === 'links';
     });
 
-    //expect(true).toBe(true);
     expect( fnode.name ).toBe( 'links' );
+  });
+});
+
+describe("spectree.getpathnode", function () {
+  it("should return the node at the path", function () {
     
+    var tree = {
+      name: 'canvas',
+      uid: 'canvas',
+      childs: [{
+        name: 'nav',
+        uid: 'canvas-0-nav',
+        childs: [{
+          name: 'links',
+          uid: 'canvas-0-nav-0-links',
+          childs: [{
+            name: 'img',
+            uid: 'canvas-0-nav-0-links-0-img',
+            childs: []
+          },{
+            name: 'thumb',
+            uid: 'canvas-0-nav-0-links-0-thumb',
+            childs: []
+          }]
+        }]
+      }]
+    };
+
+    var cwd_node = tree.childs[0].childs[0].childs[1]; // 'thumb'
+    var img_node = spectree.getpathnode(tree, cwd_node, '../img');
+
+    expect( img_node.name ).toBe( 'img' );
   });
 });

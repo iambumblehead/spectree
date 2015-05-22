@@ -1,5 +1,5 @@
 // Filename: spectree.js  
-// Timestamp: 2015.05.18-21:29:40 (last modified)  
+// Timestamp: 2015.05.22-00:02:59 (last modified)  
 // Author(s): Bumblehead (www.bumblehead.com)
 
 var spectree = ((typeof module === 'object') ? module : {}).exports = (function (s) {
@@ -80,7 +80,6 @@ var spectree = ((typeof module === 'object') ? module : {}).exports = (function 
     return patharr.length ?
       s.getpatharrnode(tree.childs[patharr[0]], patharr.slice(1)) : tree;
   };
-  
 
   // return pnode of given node 
   s.getpnode = function (tree, node) {
@@ -97,27 +96,16 @@ var spectree = ((typeof module === 'object') ? module : {}).exports = (function 
     }(patharr.length));
   };
 
-  s.getdmax = function (tree) {
-    var height = 1,
-        childs = tree && tree.childs;
+  s.getdfn = function (minmax)  {
+    return function dfn (tree) {
+      var childs = tree && tree.childs;
 
-    if (childs.length) {
-      height += Math.max.apply(s, childs.map(s.getdmax));
-    }
-
-    return height;
+      return childs.length ? minmax.apply(s, childs.map(dfn)) + 1 : 1;
+    };
   };
-
-  s.getdmin = function (tree) {
-    var height = 1,
-        childs = tree && tree.childs;
-
-    if (childs.length) {
-      height += Math.min.apply(s, childs.map(s.getdmax));
-    }
-
-    return height;
-  };
+  
+  s.getdmax = s.getdfn(Math.max);
+  s.getdmin = s.getdfn(Math.min);  
 
   s.bftraversed = function (tree, node, depth, fn) {
     var fnode;

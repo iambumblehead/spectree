@@ -1,5 +1,5 @@
 // Filename: spectree.js  
-// Timestamp: 2015.05.22-00:02:59 (last modified)  
+// Timestamp: 2015.05.24-23:49:36 (last modified)  
 // Author(s): Bumblehead (www.bumblehead.com)
 
 var spectree = ((typeof module === 'object') ? module : {}).exports = (function (s) {
@@ -144,6 +144,48 @@ var spectree = ((typeof module === 'object') ? module : {}).exports = (function 
       });
       return fnode || fn(tree, node) && node;
     }(tree, tree, fn));
+  };
+
+  // visit node, then children and so on back to node
+  // depth first search w preorder and postorder access
+  //
+  // prefn and postfn are optional
+  //
+  //  gani_tree.walkasync(
+  //    node,
+  //    function donefn (err, node) {
+  //      console.log('traverse is complete ', err, node);
+  //    }, 
+  //    function prefn (node, pnode, fn) {
+  //      handlenodebeforedepth(node, function (err, res) {
+  //        fn(err, res);
+  //      });
+  //    },
+  //    function postfn (node, pnode, fn) {
+  //      handlenodeafterdepth(node, function (err, res) {
+  //        fn(err, res);
+  //      });          
+  //    });
+  //
+  s.walkasync = function wasync (node, fn, prefn, postfn, pnode) {
+    var deffn = function (n, p, f) { f(null, n); };
+        
+    prefn  = typeof prefn  === 'function' ? prefn  : deffn;
+    postfn = typeof postfn === 'function' ? postfn : deffn;    
+
+    prefn(node, pnode, function (err, node) {
+      if (err) return fn(err);
+
+      (function next (x, childs, len) {
+        if (x >= len) return postfn(node, pnode, fn);
+
+        s.walkasync(childs[x], function (err, child) {
+          if (err) return fn(err);
+
+          next(++x, childs, len);        
+        }, prefn, postfn, node);
+      }(0, node.childs, node.childs.length));
+    });
   };
 
   s.flatten = function (tree, optfilterfn) {

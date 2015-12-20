@@ -1,8 +1,8 @@
 // Filename: spectree.js  
-// Timestamp: 2015.05.24-23:49:36 (last modified)  
+// Timestamp: 2015.12.19-17:35:02 (last modified)
 // Author(s): Bumblehead (www.bumblehead.com)
 
-var spectree = ((typeof module === 'object') ? module : {}).exports = (function (s) {
+var spectree = module.exports = (function (s) {
 
   var isword = /^\D/;
 

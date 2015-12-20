@@ -1,6 +1,7 @@
 {
   "name": "spectree",
-  "version": "0.0.1",
+  "main": "spectree",  
+  "version": "0.0.2",
   "license" : "MIT",
   "repository": {
     "type": "git",
